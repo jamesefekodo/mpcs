@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Config\BasicSystemSetting;
 use Illuminate\Support\Facades\Auth;
 
 if (!function_exists('getUserType')) {
@@ -109,5 +110,32 @@ if (!function_exists('getUserType')) {
         |--------------------------------------------------------------------------
         */
         return 'member';
+    }
+}
+
+
+
+if (!function_exists('basicSystemInfo')) {
+    function basicSystemInfo()
+    {
+        return BasicSystemSetting::first();
+    }
+}
+
+
+if (!function_exists('associationLogo')) {
+    function associationLogo()
+    {
+        $defaultSettings = basicSystemInfo();
+
+        if (
+            $defaultSettings &&
+            !empty($defaultSettings->association_logo) &&
+            file_exists(public_path('system/images/' . $defaultSettings->association_logo))
+        ) {
+            return asset('system/images/' . $defaultSettings->association_logo);
+        }
+
+        return asset('system/images/transcend_logo.webp');
     }
 }

@@ -35,6 +35,7 @@ class User extends Authenticatable
         'password',
         'admin_privilege',
         'last_seen_at',
+        'is_on_probation',
     ];
 
 
@@ -49,6 +50,7 @@ class User extends Authenticatable
             'require_login_mfa' => 'boolean',
             'admin_privilege' => 'boolean',
             'last_seen_at' => 'datetime',
+            'is_on_probation' => 'boolean'
         ];
     }
 
