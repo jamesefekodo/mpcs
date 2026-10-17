@@ -328,32 +328,52 @@
             /*
              * PASSWORD VISIBILITY
              */
-            const password = document.getElementById('password');
-            const passwordToggle = document.getElementById('passwordToggle');
-            const passwordIcon = document.getElementById('passwordIcon');
+            function setupPasswordToggle(inputId, toggleId, iconId, label) {
+                const passwordInput = document.getElementById(inputId);
+                const passwordToggle = document.getElementById(toggleId);
+                const passwordIcon = document.getElementById(iconId);
 
-            passwordToggle.hidden = false;
+                if (!passwordInput || !passwordToggle || !passwordIcon) {
+                    return;
+                }
 
-            passwordToggle.addEventListener('click', () => {
-                const visible = password.type === 'password';
+                passwordToggle.hidden = false;
 
-                password.type = visible ? 'text' : 'password';
+                passwordToggle.addEventListener('click', () => {
+                    const visible = passwordInput.type === 'password';
 
-                passwordToggle.setAttribute(
-                    'aria-label',
-                    visible ? 'Hide password' : 'Show password'
-                );
+                    passwordInput.type = visible ? 'text' : 'password';
 
-                passwordToggle.setAttribute(
-                    'aria-pressed',
-                    String(visible)
-                );
+                    passwordToggle.setAttribute(
+                        'aria-label',
+                        `${visible ? 'Hide' : 'Show'} ${label}`
+                    );
 
-                passwordIcon.setAttribute(
-                    'href',
-                    visible ? '#eye-off' : '#eye'
-                );
-            });
+                    passwordToggle.setAttribute(
+                        'aria-pressed',
+                        String(visible)
+                    );
+
+                    passwordIcon.setAttribute(
+                        'href',
+                        visible ? '#eye-off' : '#eye'
+                    );
+                });
+            }
+
+            setupPasswordToggle(
+                'password',
+                'passwordToggle',
+                'passwordIcon',
+                'password'
+            );
+
+            setupPasswordToggle(
+                'confirm_password',
+                'confirmPasswordToggle',
+                'confirmPasswordIcon',
+                'confirm password'
+            );
 
             document.addEventListener('submit', function(event) {
                 const form = event.target;

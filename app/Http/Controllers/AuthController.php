@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Auth\NewAccountWelcomeMail;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -187,4 +189,79 @@ class AuthController extends Controller
         }
     }
 
+    public function register()
+    {
+        if (Auth::check()) {
+            return $this->redirectToUserDashboard(
+                Auth::user()->account_type
+            );
+        }
+
+        return view('utilities.pages.auth.register');
+    }
+    public function submitUserRegistrationRequest(Request $request)
+    {
+        $passwordRules = [
+            'required',
+            'string',
+            'min:8', // Minimum of 8 characters
+            'regex:/[A-Z]/', // At least 1 uppercase letter
+            'regex:/[a-z]/', // At least 1 lowercase letter
+            'regex:/[0-9]/', // At least 1 number
+            'regex:/[!@#$%^&*(),.?":{}|<>]/', // At least 1 special character
+        ];
+
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'username' => [
+                'required',
+                'unique:users,username',
+                'regex:/^\S*$/u',           // No spaces allowed
+                'min:8',                    // Minimum 8 characters
+                'not_regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',  // No email format
+                'not_regex:/[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}\x{1F700}-\x{1F77F}\x{1F780}-\x{1F7FF}\x{1F800}-\x{1F8FF}\x{1F900}-\x{1F9FF}\x{1FA00}-\x{1FA6F}\x{1FA70}-\x{1FAFF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}\x{2300}-\x{23FF}\x{2B50}]/u',
+            ],
+
+            'email' => 'required|email|unique:users,email',
+
+            'phone' => 'required|string|unique:users,phone',
+            'password' => $passwordRules,
+            'confirm_password' => 'required|string|same:password',
+        ], [
+            // Custom error messages
+            'username.required' => 'The username is required.',
+            'username.unique' => 'This username is already taken.',
+            'username.regex' => 'The username cannot contain spaces.',
+            'password.required' => 'The password is required.',
+            'password.min' => 'The password must be at least 8 characters long.',
+            'password.regex' => 'The password must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+            'confirm_password.same' => 'The confirmation password does not match.',
+        ]);
+
+        // Check validation results
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator) // Pass all validation errors
+                ->withInput(); // Retain user input
+        }
+
+
+        $user = new User();
+        $user->username = strtolower(trim($request->username));
+        $user->email = trim($request->email);
+        $user->phone = trim($request->phone);
+        $user->account_type = 1;
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        Mail::to($user->email)->send(new NewAccountWelcomeMail($user));
+
+
+        $loginRequest = new Request([
+            'login_id' => $user->email,
+            'password' => $request->password,
+        ]);
+
+        return $this->authLogin($loginRequest);
+    }
 }

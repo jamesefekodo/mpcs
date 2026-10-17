@@ -36,7 +36,7 @@
                 @csrf
 
                 <div class="field">
-                    <label class="field-label" for="email">
+                    <label class="field-label" for="login_id">
                         Username or Email address
                     </label>
 
@@ -54,7 +54,7 @@
                     <div class="input-wrap">
                         <input id="password" type="password" name="password"
                             class="form-input password-input @error('password') invalid @enderror"
-                            placeholder="Enter your password" autocomplete="current-password" required>
+                            placeholder="Enter your password" autocomplete="none" required>
 
                         <button id="passwordToggle" type="button" class="password-toggle" aria-label="Show password"
                             aria-controls="password" aria-pressed="false" hidden>
@@ -79,11 +79,10 @@
                 </div>
 
                 <button type="submit" class="submit-button" data-loading-text="Processing... Please wait">
-                    <span data-button-text>Pay Now</span>
+                    <span data-button-text>Login</span>
 
-                    <svg data-button-arrow class="icon" aria-hidden="true">
-                        <use href="#arrow-right"></use>
-                    </svg>
+                    <i class="fas fa-key me-1"></i>
+
 
                     <span data-button-spinner class="spinner" aria-hidden="true" hidden></span>
                 </button>
@@ -98,17 +97,8 @@
             </p>
         </div>
 
-        <footer class="login-footer">
-            <span>© {{ date('Y') }} {{ basicSystemInfo()->association_acronym }}. All rights reserved.</span>
+        @include('utilities.pages.auth.include.loginFooter')
 
-            <span class="footer-note">
-                <svg class="icon" aria-hidden="true">
-                    <use href="#shield"></use>
-                </svg>
-
-                Member access
-            </span>
-        </footer>
     </section>
 
 @endsection
