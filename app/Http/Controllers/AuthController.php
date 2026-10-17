@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Auth\NewAccountWelcomeMail;
+use App\Models\Config\BasicSystemSetting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -262,5 +263,21 @@ class AuthController extends Controller
         ]);
 
         return $this->authLogin($loginRequest);
+    }
+    public function maintenanceMode()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return $this->accessDeniedLogout();
+        }
+        $basicDefaultSettings = BasicSystemSetting::first();
+        if (
+            $basicDefaultSettings->maintenance_mode === true && ! in_array((int) $user->account_type, [0, 90], true)
+        ) {
+            return view('utilities.pages.auth.maintenanceMode');
+        }
+        if (!empty(Auth::check())) {
+            return $this->redirectToUserDashboard(Auth::user()->account_type);
+        }
     }
 }
