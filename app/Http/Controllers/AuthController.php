@@ -21,10 +21,9 @@ class AuthController extends Controller
         switch ($accountType) {
             // 0 - root, 1-admin , 2- student
             case 0:
-            case 1:
             case 90:
                 return redirect()->route('adminDashboard');
-            case 2:
+            case 1:
                 return redirect()->route('memberDashboard');
             default:
                 return $this->accessDeniedLogout();

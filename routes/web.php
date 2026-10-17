@@ -34,9 +34,8 @@ Route::middleware(['authenticationMiddlewares'])->group(function () {
 });
 
 // members routes
-Route::middleware(['authenticationMiddlewares', 'studentMiddlewares'])->group(function () {
-    // Route::get('member/dashboard', [DashboardController::class, 'dashboard'])->name('memberDashboard');
-
+Route::middleware(['authenticationMiddlewares', 'memberMiddlewares'])->group(function () {
+    Route::get('member/dashboard', [DashboardController::class, 'dashboard'])->name('memberDashboard');
 });
 
 // administrators routes
