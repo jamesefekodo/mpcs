@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('tenant_id')->nullable();
             $table->string('uuid')->unique();
             $table->string('username')->unique();
             $table->integer('account_type')->default(2); // 0 - root/admin, 1-member ---------- 90 - odu root

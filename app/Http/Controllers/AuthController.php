@@ -162,4 +162,29 @@ class AuthController extends Controller
         }
         return view('utilities.pages.auth.login');
     }
+    public function authLogin(Request $request)
+    {
+        $request->validate([
+            'login_id' => 'required',
+            'password' => 'required',
+        ]);
+
+
+        if (Auth::attempt(['username' => $request->login_id, 'password' => $request->password]) || Auth::attempt(['email' => $request->login_id, 'password' => $request->password],)) {
+            $user = Auth::user();
+
+            if ($user) {
+                if ($user->require_login_mfa == 1) {
+                    return redirect()->route('authenticateLogin');
+                } else {
+                    return $this->redirectToUserDashboard($user->account_type);
+                }
+            } else {
+                return redirect()->route('AuthLogout');
+            }
+        } else {
+            return redirect()->back()->with('error', "Invalid Credentials");
+        }
+    }
+
 }

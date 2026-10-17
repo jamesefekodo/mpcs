@@ -355,42 +355,44 @@
                 );
             });
 
-            // /*
-            //  * SUBMIT FEEDBACK
-            //  */
-            // const form = document.getElementById('loginForm');
-            // const button = document.getElementById('submitButton');
-            // const text = document.getElementById('submitText');
-            // const arrow = document.getElementById('submitArrow');
-            // const spinner = document.getElementById('submitSpinner');
-            // const status = document.getElementById('formStatus');
+            document.addEventListener('submit', function(event) {
+                const form = event.target;
 
-            // form.addEventListener('submit', (event) => {
-            //     if (button.disabled) {
-            //         event.preventDefault();
-            //         return;
-            //     }
+                if (!(form instanceof HTMLFormElement)) {
+                    return;
+                }
 
-            //     button.disabled = true;
-            //     text.textContent = 'Signing in…';
+                const button = form.querySelector('button[type="submit"]');
 
-            //     arrow.hidden = true;
-            //     spinner.hidden = false;
+                if (!button || button.dataset.loading === 'true') {
+                    event.preventDefault();
+                    return;
+                }
 
-            //     form.setAttribute('aria-busy', 'true');
-            //     status.textContent = 'Signing in. Please wait.';
-            // });
+                const textElement = button.querySelector('[data-button-text]');
+                const spinner = button.querySelector('[data-button-spinner]');
+                const arrow = button.querySelector('[data-button-arrow]');
 
-            // window.addEventListener('pageshow', () => {
-            //     button.disabled = false;
-            //     text.textContent = 'Sign in to your account';
+                const loadingText =
+                    button.dataset.loadingText || 'Processing... Please wait';
 
-            //     arrow.hidden = false;
-            //     spinner.hidden = true;
+                button.dataset.loading = 'true';
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
 
-            //     form.removeAttribute('aria-busy');
-            //     status.textContent = '';
-            // });
+                if (textElement) {
+                    button.dataset.originalText = textElement.textContent;
+                    textElement.textContent = loadingText;
+                }
+
+                if (spinner) {
+                    spinner.hidden = false;
+                }
+
+                if (arrow) {
+                    arrow.hidden = true;
+                }
+            });
         })();
     </script>
 

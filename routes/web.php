@@ -19,6 +19,18 @@ Route::middleware(['authenticationMiddlewares'])->group(function () {
     });
 
     Route::get('login', [AuthController::class, 'login'])->name('loginPage');
+    Route::post('login/submit', [AuthController::class, 'authLogin'])->name('submitLoginRequest');
+    Route::get('register', [AuthController::class, 'register'])->name('registrationPage');
+    Route::post('register/submit', [AuthController::class, 'submitUserRegistrationRequest'])->name('submitUserRegistrationRequest');
+
+
+    Route::get('logout', [AuthController::class, 'AuthLogout'])->name('logoutRequest');
+    Route::get('forgot_password', [AuthController::class, 'forgotPassword'])->name('forgotPassword');
+    Route::post('forgot_password/send_password_reset_link', [AuthController::class, 'requestPasswordResetLink'])->name('requestPasswordResetLink');
+    Route::get('reset_password/{token}', [AuthController::class, 'passwordResetPage'])->name('passwordResetLink');
+    Route::post('reset_password/change_password/{token}', [AuthController::class, 'submitPasswordResetRequest'])->name('submitPasswordResetRequest');
+
+    Route::get('maintenance_mode', [AuthController::class, 'maintenanceMode'])->name('maintenanceMode');
 });
 
 // members routes
