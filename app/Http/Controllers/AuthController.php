@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Auth\EmailVerificationMail;
 use App\Mail\Auth\NewAccountWelcomeMail;
 use App\Models\Config\BasicSystemSetting;
 use App\Models\User;
@@ -278,6 +279,114 @@ class AuthController extends Controller
         }
         if (!empty(Auth::check())) {
             return $this->redirectToUserDashboard(Auth::user()->account_type);
+        }
+    }
+    public function generateEmailVerificationCode(User $user)
+    {
+        $otp = rand(10000000, 99999999);
+
+        DB::table('users')
+            ->where('username', $user->username)
+            ->update([
+                'email_verification_code' => $otp,
+                'email_verification_code_expires_at' => now()->addMinutes(10),
+            ]);
+
+        return $otp;
+    }
+
+    public function resetEmailVerificationCode(User $user)
+    {
+        DB::table('users')
+            ->where('username', $user->username)
+            ->update([
+                'email_verification_code' => null,
+                'email_verification_code_expires_at' => null,
+            ]);
+    }
+    private function sendEmailVerificationCodeEmailtoUser($email, $otp)
+    {
+        // Send OTP to user's email
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return redirect()->back()->with('error', 'Error!');
+        } else {
+            // Mail::to($email)->send(new EmailVerificationMail($email, $user, $otp));
+            Mail::to($email)->queue((new EmailVerificationMail($email, $user, $otp))->onConnection('deferred')->afterCommit()
+            );
+        }
+    }
+    public function verifyUserEmail()
+    {
+        $user = Auth::user();
+        if (
+            $user->email_verification !== true
+        ) {
+            $hasValidCode = !empty($user->email_verification_code)
+                && $user->email_verification_code_expires_at
+                && Carbon::parse($user->email_verification_code_expires_at)->gt(now());
+
+            if ($hasValidCode) {
+                // Use the existing active code
+                $otp = $user->email_verification_code;
+            } else {
+                // Generate a new code because it's missing, empty, or expired
+                $otp = $this->generateEmailVerificationCode($user);
+            }
+
+            // Send the email with whichever code is active/generated
+            $this->sendEmailVerificationCodeEmailtoUser($user->email, $otp);
+
+            return view('utilities.pages.auth.userAccountValidation');
+        } else {
+            return $this->redirectToUserDashboard($user->account_type);
+        }
+    }
+    public function resendEmailVerificationCodeEmailtoUser()
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            $otp = $this->generateEmailVerificationCode($user);
+            $this->sendEmailVerificationCodeEmailtoUser($user->email, $otp);
+
+            return redirect()->back()->with('success', 'Check your mail for the code!');
+        } else {
+            return $this->accessDeniedLogout();
+        }
+    }
+    public function verifyUserEmailSubmit(Request $request)
+    {
+        $request->validate([
+            'email_verification_code' => 'required|numeric|digits:8',
+        ]);
+        $user = Auth::user();
+        $userRec = User::where('username', $user->username);
+
+
+        if ($user) {
+            // Check if OTP has expired
+            if ($user->email_verification_code_expires_at < now()) {
+                $this->resetEmailVerificationCode($user);
+                return $this->accessDeniedLogout();
+            }
+
+            // check if OTP is correct
+            if ($request->input('email_verification_code') === $user->email_verification_code) {
+                $this->resetEmailVerificationCode($user);
+
+
+                $userRec->update([
+                    'email_verification' => true,
+                    'email_verified_at' => now(),
+                ]);
+
+                return $this->redirectToUserDashboard(Auth::user()->account_type);
+            } else {
+                return redirect()->back()->with('error', 'Invalid Code!');
+            }
+        } else {
+            return $this->accessDeniedLogout();
         }
     }
 }

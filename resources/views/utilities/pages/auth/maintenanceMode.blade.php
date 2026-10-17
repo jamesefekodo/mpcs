@@ -17,7 +17,7 @@
             </h1>
 
             <h5 class="text-muted my-3">
-                We’re making a few improvements to your GIMMS experience. The member portal is temporarily unavailable while
+                We’re making a few improvements to your {{ strtoupper(basicSystemInfo()->association_acronym) }} experience. The member portal is temporarily unavailable while
                 we work. Please check back later. Thank you for bearing with us.
             </h5>
 

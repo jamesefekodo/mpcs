@@ -69,8 +69,8 @@ class AuthenticationMiddleware
             $maintenanceModeLock = $basicDefaultSettings->maintenance_mode === true && ! in_array((int) $accountType, [0, 90], true);
 
             $maintenanceStatus = 'waiting';
-            $mfaVerificationStatus = 'waiting';
             $emailVerificationStatus = 'waiting';
+            $mfaVerificationStatus = 'waiting';
             $policyGuard = 'waiting';
             $sessionLimitStatus = 'waiting';
             $sessionLimitStatus = 'cleared';
@@ -97,20 +97,20 @@ class AuthenticationMiddleware
             }
 
             // // Account Email Verification
-            // if ($maintenanceStatus === 'cleared') {
-            //     if ($user->email_verification !== true) {
-            //         if (
-            //             !Route::is('verifyUserEmail')
-            //             && !Route::is('logoutRequest')
-            //             && !Route::is('verifyUserEmailResendOtp')
-            //             && !Route::is('verifyUserEmailSubmit')
-            //         ) {
-            //             return redirect()->route('verifyUserEmail');
-            //         }
-            //     } else {
-            //         $emailVerificationStatus = 'cleared';
-            //     }
-            // }
+            if ($maintenanceStatus === 'cleared') {
+                if ($user->email_verification !== true) {
+                    if (
+                        !Route::is('verifyUserEmail')
+                        && !Route::is('logoutRequest')
+                        && !Route::is('verifyUserEmailResendOtp')
+                        && !Route::is('verifyUserEmailSubmit')
+                    ) {
+                        return redirect()->route('verifyUserEmail');
+                    }
+                } else {
+                    $emailVerificationStatus = 'cleared';
+                }
+            }
             // // Mfa verification
             // if (
             //     $maintenanceStatus === 'cleared' &&
