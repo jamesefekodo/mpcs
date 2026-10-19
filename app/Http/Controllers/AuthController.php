@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Auth\EmailVerificationMail;
+use App\Mail\Auth\LoginOtpMail;
 use App\Mail\Auth\NewAccountWelcomeMail;
 use App\Models\Config\BasicSystemSetting;
 use App\Models\User;
@@ -312,8 +313,7 @@ class AuthController extends Controller
             return redirect()->back()->with('error', 'Error!');
         } else {
             // Mail::to($email)->send(new EmailVerificationMail($email, $user, $otp));
-            Mail::to($email)->queue((new EmailVerificationMail($email, $user, $otp))->onConnection('deferred')->afterCommit()
-            );
+            Mail::to($email)->queue((new EmailVerificationMail($email, $user, $otp))->onConnection('deferred')->afterCommit());
         }
     }
     public function verifyUserEmail()
@@ -385,6 +385,160 @@ class AuthController extends Controller
             } else {
                 return redirect()->back()->with('error', 'Invalid Code!');
             }
+        } else {
+            return $this->accessDeniedLogout();
+        }
+    }
+
+    public function generateTwoFactorCode(User $user, $currentSession)
+    {
+        $otp = rand(100000, 999999);
+
+        DB::table('sessions')
+            ->where('id', $currentSession->id)
+            ->update([
+                'login_otp' => $otp,
+                'login_otp_expires_at' => now()->addMinutes(10),
+            ]);
+
+        return $otp;
+    }
+
+    public function resetTwoFactorCode(User $user, $currentSession)
+    {
+        DB::table('sessions')
+            ->where('id', $currentSession->id)
+            ->update([
+                'login_otp' => null,
+                'login_otp_expires_at' => null,
+            ]);
+    }
+
+
+    private function sendLoginOtpByEmailtoUser($email, $otp)
+    {
+        // Send OTP to user's email
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return redirect()->back()->with('error', 'Error!');
+        } else {
+            // Mail::to($email)->send(new LoginOtpMail($email, $user, $otp));
+            Mail::to($email)->queue((new LoginOtpMail($email, $user, $otp))->onConnection('deferred')->afterCommit());
+        }
+    }
+    public function loginOtpExpiredLogout()
+    {
+        // Get current session ID
+        $currentSessionId = Session::getId();
+        $now = Carbon::now();
+
+
+        Auth::logout();
+
+        // Invalidate and regenerate the session token
+        Session::invalidate();
+        Session::regenerateToken();
+
+
+        // Check if session driver is 'database'
+        if (config('session.driver') === 'database') {
+            $currentSession = DB::table('sessions')->where('id', $currentSessionId)->first();
+
+            // If the session exists, delete it from the database
+            if ($currentSession) {
+                DB::table('sessions')->where('id', $currentSession->id)->delete();
+            }
+        }
+
+        return redirect(url('/'))->with('error', 'OTP has expired!');
+    }
+    public function authenticateLogin()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return $this->accessDeniedLogout();
+        }
+
+        $currentSessionId = Session::getId();
+        $currentSession = DB::table('sessions')->where('id', $currentSessionId)->first();
+
+        if (!$currentSession) {
+            return $this->accessDeniedLogout();
+        }
+
+        if ($user->require_login_mfa == 0) {
+            return $this->redirectToUserDashboard($user->account_type);
+        }
+
+        // MFA verified
+        if ((int) $currentSession->mfa_verified === 1) {
+            return $this->redirectToUserDashboard($user->account_type);
+        }
+
+
+        // OTP to email senabled and not yet verified
+        if (
+            (int) $user->require_login_mfa === 1
+            && (int) $currentSession->mfa_verified !== 1
+        ) {
+
+            if (
+                $currentSession->login_otp === null ||
+                $currentSession->login_otp === '' ||
+                Carbon::parse($currentSession->login_otp_expires_at)->lt(now())
+            ) {
+                $otp = $this->generateTwoFactorCode($user, $currentSession);
+                $this->sendLoginOtpByEmailtoUser($user->email, $otp);
+            }
+
+            return view('utilities.pages.auth.loginOtpAuthentication');
+        }
+    }
+    public function verifyLoginOtpSubmit(Request $request)
+    {
+        $request->validate([
+            'login_otp' => 'required|numeric|digits:6',
+        ]);
+        $user = Auth::user();
+        $currentSessionId = Session::getId();
+        $currentSession = DB::table('sessions')->where('id', $currentSessionId)->first();
+
+        if ($user) {
+            // Check if OTP has expired
+            if ($currentSession->login_otp_expires_at < now()) {
+                $this->resetTwoFactorCode($user, $currentSession);
+                return $this->loginOtpExpiredLogout();
+            }
+
+            // check if OTP is correct
+            if ((int) $request->input('login_otp') === (int)$currentSession->login_otp) {
+                DB::table('sessions')
+                    ->where('id', $currentSession->id)
+                    ->update([
+                        'mfa_verified' => 1,
+                    ]);
+                $this->resetTwoFactorCode($user, $currentSession);
+
+                return $this->redirectToUserDashboard(Auth::user()->account_type);
+            } else {
+                return redirect()->back()->with('error', 'Incorrect OTP!');
+            }
+        } else {
+            return $this->accessDeniedLogout();
+        }
+    }
+    public function resendLoginOtp()
+    {
+        $user = Auth::user();
+        $currentSessionId = Session::getId();
+        $currentSession = DB::table('sessions')->where('id', $currentSessionId)->first();
+
+        if ($user) {
+            $otp = $this->generateTwoFactorCode($user, $currentSession);
+            $this->sendLoginOtpByEmailtoUser($user->email, $otp);
+
+            return redirect()->back()->with('success', 'OTP Sent!');
         } else {
             return $this->accessDeniedLogout();
         }

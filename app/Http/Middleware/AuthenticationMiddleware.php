@@ -111,33 +111,34 @@ class AuthenticationMiddleware
                     $emailVerificationStatus = 'cleared';
                 }
             }
-            // // Mfa verification
-            // if (
-            //     $maintenanceStatus === 'cleared' &&
-            //     $emailVerificationStatus === 'cleared'
-            // ) {
-            //     if ((bool) $user->require_login_mfa === true) {
-            //         if (
-            //             (bool) $currentSession->mfa_verified !== true
-            //             || $currentSession->login_otp !== null
-            //             || $currentSession->login_otp_expires_at !== null
-            //         ) {
-            //             if (
-            //                 !Route::is('authenticateLogin')
-            //                 && !Route::is('logoutRequest')
-            //                 && !Route::is('resendLoginOtp')
-            //                 && !Route::is('verifyLoginOtp')
-            //                 && !Route::is('verifyLoginOtpSubmit')
-            //             ) {
-            //                 return redirect()->route('authenticateLogin');
-            //             }
-            //         } else {
-            //             $mfaVerificationStatus = 'cleared';
-            //         }
-            //     } else {
-            //         $mfaVerificationStatus = 'cleared';
-            //     }
-            // }
+
+            // Mfa verification
+            if (
+                $maintenanceStatus === 'cleared' &&
+                $emailVerificationStatus === 'cleared'
+            ) {
+                if ((bool) $user->require_login_mfa === true) {
+                    if (
+                        (bool) $currentSession->mfa_verified !== true
+                        || $currentSession->login_otp !== null
+                        || $currentSession->login_otp_expires_at !== null
+                    ) {
+                        if (
+                            !Route::is('authenticateLogin')
+                            && !Route::is('logoutRequest')
+                            && !Route::is('resendLoginOtp')
+                            && !Route::is('verifyLoginOtp')
+                            && !Route::is('verifyLoginOtpSubmit')
+                        ) {
+                            return redirect()->route('authenticateLogin');
+                        }
+                    } else {
+                        $mfaVerificationStatus = 'cleared';
+                    }
+                } else {
+                    $mfaVerificationStatus = 'cleared';
+                }
+            }
 
 
             // // Policy Guard

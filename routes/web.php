@@ -35,6 +35,11 @@ Route::middleware(['authenticationMiddlewares'])->group(function () {
     Route::get('verify_email', [AuthController::class, 'verifyUserEmail'])->name('verifyUserEmail');
     Route::get('verify_email/resend_otp', [AuthController::class, 'resendEmailVerificationCodeEmailtoUser'])->name('verifyUserEmailResendOtp');
     Route::post('verify_emal/submit', [AuthController::class, 'verifyUserEmailSubmit'])->name('verifyUserEmailSubmit');
+
+
+    Route::get('login/authenticate', [AuthController::class, 'authenticateLogin'])->name('authenticateLogin');
+    Route::post('login/authenticate/submit', [AuthController::class, 'verifyLoginOtpSubmit'])->name('verifyLoginOtpSubmit');
+    Route::get('login/authenticate/resend_otp', [AuthController::class, 'resendLoginOtp'])->name('resendLoginOtp');
 });
 
 // members routes
