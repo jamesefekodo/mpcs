@@ -86,15 +86,25 @@
         }
 
         .brand-logo {
-            width: 42px;
-            height: 42px;
-            display: grid;
-            place-items: center;
-            border-radius: 13px;
-            background: linear-gradient(135deg, #14b8a6, #f59e0b);
-            color: #04211d;
-            font-weight: 900;
-        }
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 13px;
+    background: transparent;
+}
+
+.brand-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
 
         .brand-name {
             color: white;

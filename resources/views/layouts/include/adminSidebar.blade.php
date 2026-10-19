@@ -276,6 +276,10 @@
         <div class="submenu">
             <a href="#"><span><i class="fa-solid fa-user-gear submenu-icon"></i> Users &
                     Roles</span></a>
+            @if (Auth::user()->hasPermission('policy.read'))
+                <a href="{{ route('systemPolicies') }}"><span><i class="fa-solid fa-gavel submenu-icon"></i> System
+                        Policies</span></a>
+            @endif
             <a href="#"><span><i class="fa-solid fa-location-dot submenu-icon"></i> Branches /
                     Zones</span></a>
             <a href="#"><span><i class="fa-solid fa-piggy-bank submenu-icon"></i> Savings
