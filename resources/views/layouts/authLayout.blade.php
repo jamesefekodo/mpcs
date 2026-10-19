@@ -27,8 +27,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
     <title>
-        @yield('title') | {{ basicSystemInfo()?->association_acronym ?? config('app.name') }}
-        {{-- {{ config('app.name') }} --}}
+        @yield('title') · {{ basicSystemInfo()?->association_acronym ?? config('app.name') }}
     </title>
 
     @yield('style')

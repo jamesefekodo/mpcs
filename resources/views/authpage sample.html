@@ -1,0 +1,1289 @@
+@php
+    /*
+     * Update these URLs to match your existing authentication routes.
+     */
+    $loginAction = url('/login');
+    $registerUrl = url('/register');
+    $forgotPasswordUrl = url('/forgot-password');
+
+    /*
+     * Optional Google OAuth URL.
+     * Keep null if Google authentication is not implemented.
+     */
+    $googleLoginUrl = null;
+
+    /*
+     * Optional transparent logo:
+     * public/assets/images/gimms-logo.png
+     */
+    $logoPath = 'assets/images/gimms-logo.png';
+    $hasLogo = is_file(public_path($logoPath));
+@endphp
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#123e35">
+
+    <title>Welcome back · GIMMS</title>
+
+    <style>
+        :root {
+            --paper: #f7f8f2;
+            --white: #ffffff;
+            --ink: #172c26;
+            --muted: #738078;
+            --forest: #123e35;
+            --forest-hover: #1b5145;
+            --lime: #d8ee9c;
+            --line: #dfe5db;
+            --error: #a72d28;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background: var(--paper);
+
+            font-family:
+                "Inter",
+                "Segoe UI",
+                -apple-system,
+                BlinkMacSystemFont,
+                sans-serif;
+
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button,
+        a,
+        input {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: wait;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        :focus-visible {
+            outline: 3px solid #759e53;
+            outline-offset: 5px;
+        }
+
+        .auth-shell {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+
+            min-height: 100vh;
+            min-height: 100svh;
+
+            padding: 16px;
+            gap: 16px;
+        }
+
+        /* BRAND PANEL */
+
+        .brand-panel {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+
+            display: flex;
+            flex-direction: column;
+
+            min-height: 760px;
+            padding: 42px;
+
+            border-radius: 28px;
+
+            color: #ffffff;
+            background: var(--forest);
+        }
+
+        .brand-panel::before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+
+            width: 620px;
+            height: 620px;
+
+            right: -350px;
+            top: -350px;
+
+            border: 1px solid rgba(216, 238, 156, .18);
+            border-radius: 50%;
+
+            box-shadow:
+                0 0 0 70px rgba(216, 238, 156, .035),
+                0 0 0 140px rgba(216, 238, 156, .025);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            width: fit-content;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+        }
+
+        .brand-symbol {
+            display: grid;
+            grid-template-columns: repeat(2, 10px);
+            grid-template-rows: repeat(2, 10px);
+            gap: 4px;
+
+            transform: rotate(-8deg);
+        }
+
+        .brand-symbol span {
+            background: var(--lime);
+            border-radius: 3px;
+        }
+
+        .brand-symbol span:nth-child(2) {
+            border-radius: 8px 8px 3px 3px;
+        }
+
+        .brand-symbol span:nth-child(3) {
+            opacity: .55;
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 750;
+            letter-spacing: -.7px;
+        }
+
+        .brand-main {
+            position: relative;
+            margin: auto 0;
+            padding: 64px 0 48px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            margin: 0 0 25px;
+
+            color: #c8d9cf;
+            font-size: 11px;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--lime);
+        }
+
+        .brand-title {
+            position: relative;
+            z-index: 2;
+
+            margin: 0;
+            max-width: 580px;
+
+            font-size: clamp(52px, 5.4vw, 86px);
+            font-weight: 500;
+            line-height: 1.02;
+            letter-spacing: -.075em;
+        }
+
+        .brand-title em {
+            color: var(--lime);
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: 400;
+        }
+
+        .brand-copy {
+            max-width: 340px;
+            margin: 28px 0 0;
+
+            color: #b9cec3;
+
+            font-size: 14px;
+            line-height: 1.85;
+        }
+
+        /* Abstract community artwork */
+
+        .community-art {
+            position: relative;
+
+            width: 100%;
+            height: 190px;
+            margin-top: 40px;
+
+            overflow: hidden;
+        }
+
+        .art-grid {
+            position: absolute;
+            inset: 0;
+
+            opacity: .45;
+
+            background-image:
+                linear-gradient(
+                    rgba(255,255,255,.07) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,.07) 1px,
+                    transparent 1px
+                );
+
+            background-size: 38px 38px;
+
+            mask-image: linear-gradient(
+                90deg,
+                transparent,
+                black 25%,
+                black 75%,
+                transparent
+            );
+        }
+
+        .arch {
+            position: absolute;
+            bottom: 0;
+
+            width: 116px;
+            height: 155px;
+
+            border-radius: 90px 90px 12px 12px;
+        }
+
+        .arch-one {
+            left: 9%;
+            height: 130px;
+            background: #386452;
+            transform: rotate(-12deg);
+        }
+
+        .arch-two {
+            left: 31%;
+            bottom: 7px;
+            z-index: 2;
+            background: var(--lime);
+            transform: rotate(8deg);
+        }
+
+        .arch-three {
+            left: 53%;
+            height: 140px;
+            background: #edb88d;
+            transform: rotate(-9deg);
+        }
+
+        .arch-four {
+            left: 74%;
+            width: 90px;
+            height: 110px;
+            background: #6d9580;
+            transform: rotate(13deg);
+        }
+
+        .arch::before {
+            content: "";
+            position: absolute;
+
+            width: 36px;
+            height: 36px;
+            top: 29px;
+            left: calc(50% - 18px);
+
+            border: 1px solid rgba(18, 62, 53, .25);
+            border-radius: 50%;
+        }
+
+        .arch::after {
+            content: "";
+            position: absolute;
+
+            width: 58px;
+            height: 32px;
+            bottom: 30px;
+            left: calc(50% - 29px);
+
+            border: 1px solid rgba(18, 62, 53, .25);
+            border-bottom: 0;
+            border-radius: 40px 40px 0 0;
+        }
+
+        .brand-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+
+            padding-top: 22px;
+            border-top: 1px solid rgba(255,255,255,.13);
+
+            color: #b9cec3;
+            font-size: 11px;
+        }
+
+        .brand-bottom span:last-child {
+            color: var(--lime);
+        }
+
+        /* FORM PANEL */
+
+        .form-panel {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+
+            padding: 22px 32px 16px;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 9px;
+
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .top-nav a {
+            color: var(--forest);
+            font-weight: 650;
+        }
+
+        .top-nav a:hover {
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 390px;
+
+            margin: auto;
+            padding: 60px 0;
+        }
+
+        .welcome-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            margin-bottom: 24px;
+
+            color: var(--forest);
+
+            font-size: 11px;
+            font-weight: 650;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .welcome-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+
+            background: #71964b;
+            box-shadow: 0 0 0 5px #e8eedf;
+        }
+
+        .form-title {
+            margin: 0;
+
+            font-size: clamp(39px, 4vw, 53px);
+            font-weight: 550;
+            line-height: 1.1;
+            letter-spacing: -.065em;
+        }
+
+        .form-description {
+            margin: 15px 0 34px;
+
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .field {
+            margin-bottom: 21px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 9px;
+
+            color: #34483c;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .form-input {
+            display: block;
+            width: 100%;
+            height: 54px;
+
+            padding: 0 16px;
+
+            color: var(--ink);
+            background: rgba(255,255,255,.6);
+
+            border: 1px solid #d8dfd3;
+            border-radius: 10px;
+
+            font-size: 14px;
+
+            transition:
+                border-color .2s ease,
+                box-shadow .2s ease,
+                background .2s ease;
+        }
+
+        .form-input::placeholder {
+            color: #9aA397;
+        }
+
+        .form-input:hover {
+            border-color: #aab9a3;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: #ffffff;
+            border-color: #64875c;
+            box-shadow: 0 0 0 4px rgba(100,135,92,.09);
+        }
+
+        .form-input.invalid {
+            border-color: #cd8e85;
+        }
+
+        .password-input {
+            padding-right: 52px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+
+            display: grid;
+            place-items: center;
+
+            width: 40px;
+            height: 40px;
+
+            padding: 0;
+            border: 0;
+            border-radius: 7px;
+
+            color: #7b897a;
+            background: transparent;
+        }
+
+        .password-toggle:hover {
+            color: var(--forest);
+            background: #eef2e8;
+        }
+
+        .icon {
+            width: 19px;
+            height: 19px;
+
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+
+            margin: 2px 0 27px;
+
+            font-size: 12px;
+        }
+
+        .remember {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            color: #64725f;
+            cursor: pointer;
+        }
+
+        .remember input {
+            width: 15px;
+            height: 15px;
+            margin: 0;
+            accent-color: var(--forest);
+        }
+
+        .forgot-link {
+            font-weight: 600;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .submit-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+
+            width: 100%;
+            height: 54px;
+
+            border: 0;
+            border-radius: 10px;
+
+            background: var(--forest);
+            color: #ffffff;
+
+            font-size: 13px;
+            font-weight: 650;
+
+            transition:
+                background .2s ease,
+                transform .2s ease;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background: var(--forest-hover);
+            transform: translateY(-1px);
+        }
+
+        .submit-button:disabled {
+            opacity: .75;
+        }
+
+        .submit-button .icon {
+            width: 17px;
+            height: 17px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+
+            margin: 26px 0;
+
+            color: #929c8c;
+            font-size: 11px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: var(--line);
+        }
+
+        .google-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+
+            width: 100%;
+            min-height: 52px;
+
+            border: 1px solid #d8dfd3;
+            border-radius: 10px;
+
+            background: transparent;
+            color: #3c4a36;
+
+            font-size: 13px;
+            font-weight: 550;
+
+            transition: background .2s ease;
+        }
+
+        .google-button:hover {
+            background: #eef1e7;
+        }
+
+        .google-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .form-footnote {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+
+            margin: 28px 0 0;
+
+            color: #8a9583;
+            font-size: 11px;
+        }
+
+        .form-footnote .icon {
+            width: 14px;
+            height: 14px;
+        }
+
+        .page-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+
+            color: #8c9687;
+            font-size: 10px;
+            line-height: 1.7;
+        }
+
+        .footer-wordmark {
+            color: #68765f;
+            letter-spacing: .13em;
+            font-weight: 650;
+        }
+
+        .alert {
+            margin-bottom: 22px;
+            padding: 12px 14px;
+
+            border-radius: 9px;
+
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .alert-error {
+            color: var(--error);
+            background: #fceeea;
+            border: 1px solid #f1d4cc;
+        }
+
+        .alert-success {
+            color: #24573c;
+            background: #eaf2e3;
+            border: 1px solid #d3e4c9;
+        }
+
+        .field-error {
+            margin: 7px 0 0;
+            color: var(--error);
+            font-size: 11px;
+        }
+
+        .spinner {
+            width: 17px;
+            height: 17px;
+
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+
+            animation: spin .7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+
+            width: 1px;
+            height: 1px;
+
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (min-width: 1600px) {
+            .auth-shell {
+                max-width: 1800px;
+                margin: auto;
+            }
+
+            .brand-panel {
+                padding: 60px;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .brand-panel {
+                padding: 32px;
+            }
+
+            .brand-title {
+                font-size: 62px;
+            }
+
+            .form-panel {
+                padding-left: 22px;
+                padding-right: 22px;
+            }
+
+            .community-art {
+                height: 160px;
+            }
+
+            .arch {
+                width: 95px;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .auth-shell {
+                grid-template-columns: .85fr 1fr;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .brand-panel {
+                padding: 28px;
+                border-radius: 22px;
+            }
+
+            .brand-title {
+                font-size: 51px;
+            }
+
+            .brand-copy {
+                font-size: 13px;
+            }
+
+            .brand-bottom {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .community-art {
+                height: 145px;
+            }
+
+            .arch {
+                width: 80px;
+            }
+
+            .form-panel {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .top-nav {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .auth-shell {
+                display: block;
+                padding: 10px;
+            }
+
+            .brand-panel {
+                min-height: auto;
+                padding: 25px;
+                border-radius: 20px;
+            }
+
+            .brand-logo {
+                width: 38px;
+                height: 38px;
+            }
+
+            .brand-name {
+                font-size: 19px;
+            }
+
+            .brand-main {
+                padding: 35px 0 10px;
+            }
+
+            .eyebrow {
+                margin-bottom: 16px;
+                font-size: 9px;
+            }
+
+            .brand-title {
+                max-width: 420px;
+                font-size: clamp(40px, 9vw, 58px);
+            }
+
+            .brand-copy {
+                max-width: 360px;
+                margin-top: 18px;
+                font-size: 12px;
+            }
+
+            .community-art,
+            .brand-bottom {
+                display: none;
+            }
+
+            .form-panel {
+                padding: 25px 16px 12px;
+            }
+
+            .top-nav {
+                justify-content: center;
+                font-size: 12px;
+            }
+
+            .form-container {
+                padding: 42px 0;
+            }
+
+            .form-title {
+                font-size: 43px;
+            }
+
+            .form-input {
+                font-size: 16px;
+            }
+
+            .page-footer {
+                max-width: 390px;
+                width: 100%;
+                margin: auto;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="auth-shell">
+
+        {{-- Brand / community panel --}}
+        <section class="brand-panel" aria-labelledby="brandTitle">
+            <a href="{{ url('/') }}" class="brand" aria-label="GIMMS home">
+                @if ($hasLogo)
+                    <img
+                        src="{{ asset($logoPath) }}"
+                        alt=""
+                        class="brand-logo"
+                        width="48"
+                        height="48"
+                    >
+                @else
+                    <span class="brand-symbol" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                @endif
+
+                <span class="brand-name">gimms.</span>
+            </a>
+
+            <div class="brand-main">
+                <p class="eyebrow">Built around people</p>
+
+                <h1 class="brand-title" id="brandTitle">
+                    Good things<br>
+                    happen<br>
+                    <em>together.</em>
+                </h1>
+
+                <p class="brand-copy">
+                    A place to belong. A community to grow with.
+                    Your next chapter starts with the people beside you.
+                </p>
+
+                <div class="community-art" aria-hidden="true">
+                    <div class="art-grid"></div>
+
+                    <div class="arch arch-one"></div>
+                    <div class="arch arch-two"></div>
+                    <div class="arch arch-three"></div>
+                    <div class="arch arch-four"></div>
+                </div>
+            </div>
+
+            <div class="brand-bottom">
+                <span>Great Ideas Multipurpose Society</span>
+                <span>People. Possibility. Progress.</span>
+            </div>
+        </section>
+
+        {{-- Authentication panel --}}
+        <section class="form-panel" aria-labelledby="loginTitle">
+            <nav class="top-nav" aria-label="Account registration">
+                <span>Not a member yet?</span>
+
+                <a href="{{ $registerUrl }}">
+                    Join the community ↗
+                </a>
+            </nav>
+
+            <div class="form-container">
+                <div class="welcome-label">
+                    <span class="welcome-dot" aria-hidden="true"></span>
+                    Your member space
+                </div>
+
+                <h2 class="form-title" id="loginTitle">
+                    Welcome back.
+                </h2>
+
+                <p class="form-description">
+                    Sign in to stay connected and keep moving forward.
+                </p>
+
+                @if (session('status'))
+                    <div class="alert alert-success" role="status">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                @if (session('success'))
+                    <div class="alert alert-success" role="status">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="alert alert-error" role="alert">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="alert alert-error" role="alert">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form
+                    id="loginForm"
+                    action="{{ $loginAction }}"
+                    method="POST"
+                >
+                    @csrf
+
+                    <div class="field">
+                        <label for="email">Email address</label>
+
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            class="form-input @error('email') invalid @enderror"
+                            placeholder="you@example.com"
+                            autocomplete="username"
+                            inputmode="email"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            required
+                            @error('email')
+                                aria-invalid="true"
+                                aria-describedby="emailError"
+                            @enderror
+                        >
+
+                        @error('email')
+                            <p id="emailError" class="field-error">
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Password</label>
+
+                        <div class="input-wrap">
+                            <input
+                                id="password"
+                                type="password"
+                                name="password"
+                                class="form-input password-input @error('password') invalid @enderror"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                                @error('password')
+                                    aria-invalid="true"
+                                    aria-describedby="passwordError"
+                                @enderror
+                            >
+
+                            <button
+                                id="passwordToggle"
+                                type="button"
+                                class="password-toggle"
+                                aria-label="Show password"
+                                aria-controls="password"
+                                aria-pressed="false"
+                                hidden
+                            >
+                                <svg
+                                    class="icon"
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"
+                                    />
+
+                                    <circle cx="12" cy="12" r="3"/>
+
+                                    <path
+                                        id="eyeSlash"
+                                        d="m3 3 18 18"
+                                        hidden
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+
+                        @error('password')
+                            <p id="passwordError" class="field-error">
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember" for="remember">
+                            <input
+                                id="remember"
+                                type="checkbox"
+                                name="remember"
+                                value="1"
+                                @checked(old('remember'))
+                            >
+
+                            <span>Keep me signed in</span>
+                        </label>
+
+                        <a
+                            href="{{ $forgotPasswordUrl }}"
+                            class="forgot-link"
+                        >
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <button
+                        id="submitButton"
+                        type="submit"
+                        class="submit-button"
+                    >
+                        <span id="submitText">Sign in</span>
+
+                        <svg
+                            id="submitArrow"
+                            class="icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                        </svg>
+
+                        <span
+                            id="submitSpinner"
+                            class="spinner"
+                            aria-hidden="true"
+                            hidden
+                        ></span>
+                    </button>
+
+                    <span
+                        id="formStatus"
+                        class="sr-only"
+                        role="status"
+                        aria-live="polite"
+                    ></span>
+                </form>
+
+                @if ($googleLoginUrl)
+                    <div class="divider">
+                        <span>or</span>
+                    </div>
+
+                    <a href="{{ $googleLoginUrl }}" class="google-button">
+                        <svg
+                            class="google-icon"
+                            viewBox="0 0 48 48"
+                            aria-hidden="true"
+                        >
+                            <path
+                                fill="#FFC107"
+                                d="M43.6 20.5H42V20H24v8h11.3A12 12 0 1 1 32.9 15l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.4-.4-3.5Z"
+                            />
+
+                            <path
+                                fill="#FF3D00"
+                                d="m6.3 14.7 6.6 4.8A12 12 0 0 1 32.9 15l5.7-5.7A20 20 0 0 0 6.3 14.7Z"
+                            />
+
+                            <path
+                                fill="#4CAF50"
+                                d="M24 44c5.2 0 10-2 13.5-5.3l-6.2-5.2A12 12 0 0 1 12.7 28l-6.6 5.1A20 20 0 0 0 24 44Z"
+                            />
+
+                            <path
+                                fill="#1976D2"
+                                d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4 5.5l6.2 5.2A20 20 0 0 0 44 24c0-1.2-.1-2.4-.4-3.5Z"
+                            />
+                        </svg>
+
+                        Continue with Google
+                    </a>
+                @endif
+
+                <p class="form-footnote">
+                    <svg
+                        class="icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/>
+                        <path d="m8 12 3 3 5-6"/>
+                    </svg>
+
+                    Your community. Your member space.
+                </p>
+            </div>
+
+            <footer class="page-footer">
+                <span>© {{ date('Y') }} GIMMS</span>
+                <span class="footer-wordmark">BETTER, TOGETHER.</span>
+            </footer>
+        </section>
+    </main>
+
+    <script>
+        (() => {
+            const password = document.getElementById('password');
+            const toggle = document.getElementById('passwordToggle');
+            const slash = document.getElementById('eyeSlash');
+
+            const form = document.getElementById('loginForm');
+            const button = document.getElementById('submitButton');
+            const text = document.getElementById('submitText');
+            const arrow = document.getElementById('submitArrow');
+            const spinner = document.getElementById('submitSpinner');
+            const status = document.getElementById('formStatus');
+
+            toggle.hidden = false;
+
+            toggle.addEventListener('click', () => {
+                const visible = password.type === 'password';
+
+                password.type = visible ? 'text' : 'password';
+                slash.hidden = !visible;
+
+                toggle.setAttribute('aria-pressed', String(visible));
+
+                toggle.setAttribute(
+                    'aria-label',
+                    visible ? 'Hide password' : 'Show password'
+                );
+            });
+
+            form.addEventListener('submit', (event) => {
+                if (button.disabled) {
+                    event.preventDefault();
+                    return;
+                }
+
+                button.disabled = true;
+                text.textContent = 'Signing in…';
+
+                arrow.hidden = true;
+                spinner.hidden = false;
+
+                form.setAttribute('aria-busy', 'true');
+                status.textContent = 'Signing in. Please wait.';
+            });
+
+            window.addEventListener('pageshow', () => {
+                button.disabled = false;
+                text.textContent = 'Sign in';
+
+                arrow.hidden = false;
+                spinner.hidden = true;
+
+                form.removeAttribute('aria-busy');
+                status.textContent = '';
+            });
+        })();
+    </script>
+</body>
+</html>
