@@ -41,6 +41,6 @@ data/
 #  Logs
 /storage/logs/*.log
 
-resources/views/authpage sample.html
-resources/views/sample admin dashboard.html
-resources/views/selected auth.html
+/resources/views/authpage sample.html
+/resources/views/sample admin dashboard.html
+/resources/views/selected auth.html
