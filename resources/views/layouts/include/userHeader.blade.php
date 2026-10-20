@@ -11,14 +11,14 @@
     </div>
 
     <div class="topbar-right">
-        <button class="icon-btn" id="themeBtn" title="Toggle theme">
+        {{-- <button class="icon-btn" id="themeBtn" title="Toggle theme">
             <i class="fa-solid fa-moon"></i>
         </button>
 
         <button class="icon-btn" title="Notifications">
             <i class="fa-regular fa-bell"></i>
             <span class="dot"></span>
-        </button>
+        </button> --}}
 
         <div class="user-menu">
             <button class="user-trigger" id="userMenuBtn" aria-haspopup="true" aria-expanded="false"

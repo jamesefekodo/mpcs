@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Config\BasicSystemSetting;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 if (!function_exists('getUserType')) {
@@ -186,5 +187,29 @@ if (!function_exists('emailSafeLogo')) {
         imagedestroy($flattened);
 
         return asset('system/images/email-safe/logo-' . ($tenantId ?? 'default') . '-' . $hex . '.png');
+    }
+}
+
+// datetime formatting
+if (! function_exists('formatDateTime')) {
+    function formatDateTime($date, string $fallback = '-'): string
+    {
+        if (blank($date)) {
+            return $fallback;
+        }
+
+        $date = $date instanceof Carbon
+            ? $date
+            : Carbon::parse($date);
+
+        if ($date->isToday()) {
+            return 'Today, ' . $date->format('h:i:s A');
+        }
+
+        if ($date->isYesterday()) {
+            return 'Yesterday, ' . $date->format('h:i:s A');
+        }
+
+        return $date->format('d M Y h:i:s A');
     }
 }

@@ -41,6 +41,10 @@ Route::middleware(['authenticationMiddlewares'])->group(function () {
     Route::get('login/authenticate', [AuthController::class, 'authenticateLogin'])->name('authenticateLogin');
     Route::post('login/authenticate/submit', [AuthController::class, 'verifyLoginOtpSubmit'])->name('verifyLoginOtpSubmit');
     Route::get('login/authenticate/resend_otp', [AuthController::class, 'resendLoginOtp'])->name('resendLoginOtp');
+
+    // Policy Agreement
+    Route::get('system/configuration/policies_and_terms/user/manage', [SystemPolicyController::class, 'manageSystemPolicyAgreement'])->name('manageSystemPolicyAgreement');
+    Route::post('system/configuration/policies_and_terms/user/agree', [SystemPolicyController::class, 'userAgreeToSystemPolicy'])->name('userAgreeToSystemPolicy');
 });
 
 // members routes
@@ -57,5 +61,8 @@ Route::middleware(['authenticationMiddlewares', 'adminMiddlewares'])->group(func
     Route::get('admin/config/policies', [SystemPolicyController::class, 'systemPolicies'])->name('systemPolicies');
     Route::get('admin/config/policies/create_new', [SystemPolicyController::class, 'newSystemPolicies'])->name('admin.systemPolicies.create');
     Route::post('admin/config/policies/create_new/submit', [SystemPolicyController::class, 'storeNewSystemPolicy'])->name('admin.systemPolicies.store');
-    Route::get('admin/config/policies/view/{slug}', [SystemPolicyController::class, 'viewSystemPolicy'])->name('admin.systemPolicies.show');
+    Route::get('admin/config/policies/{slug}/view', [SystemPolicyController::class, 'viewSystemPolicy'])->name('admin.systemPolicies.show');
+    Route::get('admin/config/policies/{slug}/edit', [SystemPolicyController::class, 'editSystemPolicy'])->name('admin.systemPolicies.edit');
+    Route::put('admin/config/policies/{slug}/update', [SystemPolicyController::class, 'updateSystemPolicy'])->name('admin.systemPolicies.update');
+    Route::delete('admin/config/policies/{slug}/delete', [SystemPolicyController::class, 'deleteSystemPolicy'])->name('admin.systemPolicies.delete');
 });

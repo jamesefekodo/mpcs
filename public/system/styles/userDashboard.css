@@ -401,6 +401,13 @@ a {
     color: white;
 }
 
+.btn-primary-b:hover,
+.btn-primary-b:active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
 .btn-gold {
     background: var(--gold);
     border-color: var(--gold);
@@ -1356,4 +1363,298 @@ body.dark .note-statusbar {
     grid-template-columns: minmax(0, 1fr);
     gap: 20px;
     align-items: start;
+}
+/* Responsive switch: mobile first */
+.policy-desktop {
+    display: none !important;
+}
+
+.policy-mobile {
+    display: block !important;
+}
+
+@media (min-width: 768px) {
+    .policy-desktop {
+        display: block !important;
+    }
+
+    .policy-mobile {
+        display: none !important;
+    }
+}
+
+/* Policy icon */
+.policy-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+}
+
+/* Mobile cards blend with page background */
+.policy-mobile-card {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--bs-border-color);
+    border-radius: 0;
+    padding-bottom: 16px;
+    margin-bottom: 30px;
+}
+
+.policy-mobile-card:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Table polish */
+.table th .btn-link {
+    vertical-align: middle;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table .btn-group {
+    min-width: 86px;
+}
+
+.card .card-title {
+    font-size: 25px;
+}
+
+/* Reusable data table */
+.data-table-head {
+    background: var(--bs-tertiary-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.data-table-head th {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: white;
+    background: var(--primary-object-col);
+    white-space: nowrap;
+}
+
+/* Sortable column button */
+.table-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    /* padding: 0; */
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.table-sort:hover,
+.table-sort:focus-visible {
+    color: var(--bs-primary);
+    outline: none;
+}
+
+.table-sort.active {
+    color: white;
+}
+
+.table-sort-icon {
+    /* font-size: 11px; */
+    opacity: 0.45;
+    transition: opacity 0.15s ease;
+}
+
+.table-sort:hover .table-sort-icon,
+.table-sort.active .table-sort-icon {
+    opacity: 1;
+}
+
+/* Reusable record icon */
+.record-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+}
+
+/* Reusable mobile record card */
+.mobile-record {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--bs-border-color);
+    border-radius: 0;
+    padding-bottom: 16px;
+    margin-bottom: 25px;
+}
+
+.mobile-record:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Reusable responsive table switch */
+.table-desktop {
+    display: none !important;
+}
+
+.table-mobile {
+    display: block !important;
+}
+
+@media (min-width: 768px) {
+    .table-desktop {
+        display: block !important;
+    }
+
+    .table-mobile {
+        display: none !important;
+    }
+}
+
+/* Reusable row hover */
+.table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: var(--bs-primary-bg-subtle);
+}
+
+.policy-desktop .table th,
+.policy-desktop .table td {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.policy-desktop .table td:first-child,
+.policy-desktop .table th:first-child {
+    padding-left: 20px;
+}
+
+.policy-desktop .table td:last-child,
+.policy-desktop .table th:last-child {
+    padding-right: 20px;
+}
+
+.mobile-card-title {
+    color: var(--primary-object-col) !important;
+    font-weight: bold;
+}
+
+/* Reusable record summary */
+.record-summary {
+    padding: 16px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 12px;
+    background: var(--bs-tertiary-bg);
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.summary-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+}
+
+.summary-value {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--bs-body-color);
+    word-break: break-word;
+}
+
+/* Reusable section */
+.detail-section {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.detail-section:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: 0;
+}
+
+.section-title {
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+}
+
+/* Rich text */
+.rich-text {
+    color: var(--bs-body-color);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.rich-text h1,
+.rich-text h2,
+.rich-text h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.rich-text p {
+    margin-bottom: 14px;
+}
+
+.rich-text ul,
+.rich-text ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+}
+
+.rich-text img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+/* Applicability */
+.applicability-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 12px;
+    background: var(--bs-body-bg);
+}
+
+.applicability-item > i:first-child {
+    font-size: 18px;
+    color: var(--bs-primary);
+}
+
+.applicability-item.muted {
+    opacity: 0.65;
 }

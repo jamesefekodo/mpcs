@@ -33,18 +33,20 @@
     <!-- jQuery -->
     {{-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> --}}
 
+
+    <link rel="stylesheet" href="{{ asset('system/styles/userDashboard.css') }}">
+
+    <!-- Toastr CSS and JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
     <!-- Summernote CSS -->
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
 
     <!-- Summernote JS -->
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
 
-    <link rel="stylesheet" href="{{ asset('system/styles/userDashboard.css') }}">
-
-       <!-- Toastr CSS and JS -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     @livewireStyles
 
 
@@ -442,7 +444,8 @@
         });
     </script>
     @include('layouts.include.toastrNotificationFunction')
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('system/js/confirm-action.js') }}"></script>
     @livewireScripts
 
 </body>
