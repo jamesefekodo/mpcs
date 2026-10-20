@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Livewire\Tables;
+namespace App\Livewire\Tables\Policy;
+
 
 use App\Models\Config\SystemPolicies\SystemPolicy;
 use Livewire\Attributes\Url;
@@ -35,6 +36,11 @@ class SystemPolicyTable extends Component
         $this->resetPage();
     }
 
+    public function updatingPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
@@ -63,19 +69,17 @@ class SystemPolicyTable extends Component
 
                 $query->where(function ($query) use ($search) {
                     $query->where('title', 'like', $search)
-                        ->orWhere('code', 'like', $search)
-                        ->orWhere('description', 'like', $search);
+                        ->orWhere('policy_statement', 'like', $search);
                 });
             })
             ->when($this->status !== '', function ($query) {
-                $query->where('status', $this->status);
+                $query->where('is_active', $this->status === 'active');
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
-        return view('components.tables.system-policy-table', [
+        return view('components.tables.policy.system-policy-table', [
             'systemPolicies' => $systemPolicies,
         ]);
-
     }
 }

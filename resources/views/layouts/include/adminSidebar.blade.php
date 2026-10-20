@@ -3,7 +3,7 @@
     <div class="nav-group">
         <div class="nav-label">Overview</div>
 
-        <button class="nav-item active">
+        <button class="nav-item {{ Route::is('adminDashboard') ? 'active' : '' }}">
             <span class="nav-left">
                 <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
                 <span class="nav-text">Dashboard</span>
@@ -265,7 +265,7 @@
     <div class="nav-group">
         <div class="nav-label">Administration</div>
 
-        <button class="nav-item has-sub">
+        <button class="nav-item has-sub {{ Str::startsWith(request()->path(), 'admin/config') ? 'active' : '' }}">
             <span class="nav-left">
                 <span class="nav-icon"><i class="fa-solid fa-gear"></i></span>
                 <span class="nav-text">Settings</span>
@@ -274,10 +274,10 @@
         </button>
 
         <div class="submenu">
-            <a href="#"><span><i class="fa-solid fa-user-gear submenu-icon"></i> Users &
+            <a href="#" class=""><span><i class="fa-solid fa-user-gear submenu-icon"></i> Users &
                     Roles</span></a>
             @if (Auth::user()->hasPermission('policy.read'))
-                <a href="{{ route('systemPolicies') }}"><span><i class="fa-solid fa-gavel submenu-icon"></i> System
+                <a href="{{ route('systemPolicies') }}" class="{{ Str::startsWith(request()->path(), 'admin/config/policies') ? 'active' : '' }}"><span><i class="fa-solid fa-gavel submenu-icon"></i> System
                         Policies</span></a>
             @endif
             <a href="#"><span><i class="fa-solid fa-location-dot submenu-icon"></i> Branches /

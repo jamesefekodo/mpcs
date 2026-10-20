@@ -20,17 +20,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="{{ asset('system/styles/userDashboard.css') }}">
 
     {{-- Sweet Alert --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.3.0/dist/sweetalert2.min.css">
 
-    <!-- Toastr CSS and JS -->
+
+
+    {{-- bootstrap --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- jQuery -->
+    {{-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> --}}
+
+    <!-- Summernote CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
+
+    <!-- Summernote JS -->
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
+
+    <link rel="stylesheet" href="{{ asset('system/styles/userDashboard.css') }}">
+
+       <!-- Toastr CSS and JS -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-
-
     @livewireStyles
 
 
@@ -43,7 +57,7 @@
 
         <!-- ================= SIDEBAR ================= -->
         <aside class="sidebar" id="sidebar">
-            <a href="{{ url('/') }}">
+            <a href="{{ url('/') }}" class="text-decoration-none">
                 <div class="brand">
                     <div class="brand-logo">
                         <img src="{{ associationLogo() }}"
@@ -90,6 +104,8 @@
 
 
     </div>
+
+    <script src="{{ asset('portal-dashboard/assets/plugins/bootstrap/js/bootstrap.min.js') }}"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -379,6 +395,54 @@
             };
         });
     </script>
+
+    {{-- submit form state manage --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll("form").forEach(function(form) {
+                const submitButton = form.querySelector(".js-submit-button");
+
+                if (!submitButton) {
+                    return;
+                }
+
+                const originalHTML = submitButton.innerHTML;
+
+                form.addEventListener("submit", function(event) {
+                    if (submitButton.disabled) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    if (!form.checkValidity()) {
+                        return;
+                    }
+
+                    submitButton.disabled = true;
+                    submitButton.setAttribute("aria-busy", "true");
+
+                    const loadingText =
+                        submitButton.dataset.loadingText || "Please wait...";
+
+                    submitButton.innerHTML = `
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                ${loadingText}
+            `;
+
+                    // Restore if submission is blocked for any reason.
+                    setTimeout(function() {
+                        if (submitButton.disabled) {
+                            submitButton.disabled = false;
+                            submitButton.removeAttribute("aria-busy");
+                            submitButton.innerHTML = originalHTML;
+                        }
+                    }, 10000);
+                });
+            });
+        });
+    </script>
+    @include('layouts.include.toastrNotificationFunction')
+
     @livewireScripts
 
 </body>

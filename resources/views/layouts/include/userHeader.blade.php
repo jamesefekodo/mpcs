@@ -4,10 +4,10 @@
             <i class="fa-solid fa-bars"></i>
         </button>
 
-        <div class="search">
+        {{-- <div class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="search" placeholder="Search members, loans, sales, invoices..." />
-        </div>
+        </div> --}}
     </div>
 
     <div class="topbar-right">

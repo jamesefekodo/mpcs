@@ -12,15 +12,14 @@
         </div>
 
         <div class="head-actions">
-            <a
-                {{-- href="{{ route('admin.system-policies.create') }}" --}}
-                class="btn btn-primary"
-            >
-                <i class="fa-solid fa-plus"></i>
-                New Policy
-            </a>
+            @if (Auth::user()->hasPermission('policy.create'))
+                <a href="{{ route('admin.systemPolicies.create') }}" class="btn btn-primary-b">
+                    <i class="fa-solid fa-plus"></i>
+                    New Policy
+                </a>
+            @endif
         </div>
     </div>
 
-    <livewire.tables.system-policy-table />
+    <livewire:tables.policy.system-policy-table />
 @endsection
